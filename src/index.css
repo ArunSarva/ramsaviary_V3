@@ -48,4 +48,12 @@
   }
   .glass-input option { background: #1e1b4b; color: white; }
   .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .safe-top { padding-top: env(safe-area-inset-top, 0px); }
+}
+
+/* Prevent iOS Safari from zooming the page when a form field is focused */
+@supports (-webkit-touch-callout: none) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
 }

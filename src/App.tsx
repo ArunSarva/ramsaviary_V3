@@ -118,24 +118,27 @@ function App() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 glass-strong rounded-2xl px-5 py-3 text-sm text-white shadow-xl max-w-xs w-[90vw] text-center transition-all">
+        <div
+          className="fixed left-1/2 -translate-x-1/2 z-50 glass-strong rounded-2xl px-5 py-3 text-sm text-white shadow-xl max-w-xs w-[90vw] text-center transition-all"
+          style={{ top: "calc(1rem + env(safe-area-inset-top, 0px))" }}
+        >
           {toast}
         </div>
       )}
 
       {/* Top header */}
-      <div className="sticky top-0 z-40 glass-strong border-b border-white/10">
-        <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center text-base">
-              <img src={RamLogo} alt="logo"></img>
+      <div className="sticky top-0 z-40 glass-strong border-b border-white/10 safe-top">
+        <div className="flex items-center justify-between px-4 py-3 gap-2">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 shrink-0 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center text-base overflow-hidden">
+              <img src={RamLogo} alt="logo" className="w-full h-full object-cover" />
             </div>
-            <div>
-              <h1 className="text-sm font-bold leading-tight">Ram's Avairy</h1>
-              <p className="text-white/40 text-[10px]">P&L Tracker 2025</p>
+            <div className="min-w-0">
+              <h1 className="text-sm font-bold leading-tight truncate">Ram's Avairy</h1>
+              <p className="text-white/40 text-[10px] truncate">P&L Tracker 2025</p>
             </div>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 shrink-0">
             <input
               type="file"
               accept=".xlsx,.xls"
@@ -166,8 +169,11 @@ function App() {
         </div>
       </div>
 
-      {/* Main content — padding-bottom for bottom nav */}
-      <div className="relative px-3 pt-4 pb-24 max-w-2xl mx-auto">
+      {/* Main content — padding-bottom clears the fixed bottom nav + home indicator */}
+      <div
+        className="relative px-3 pt-4 max-w-2xl mx-auto"
+        style={{ paddingBottom: "calc(6.5rem + env(safe-area-inset-bottom, 0px))" }}
+      >
         {isEmpty && activeTab !== "add" && (
           <div className="glass-card rounded-2xl p-8 text-center mt-4">
             <div className="text-5xl mb-3">📊</div>

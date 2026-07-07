@@ -69,11 +69,14 @@ const FeedsTable: React.FC<FeedsTableProps> = ({ feeds, onDelete }) => {
   const [search, setSearch] = useState('');
   const [modal, setModal] = useState<{ index: number; label: string } | null>(null);
 
-  const filtered = feeds.filter(f =>
-    f.item.toLowerCase().includes(search.toLowerCase()) ||
-    f.supplierName.toLowerCase().includes(search.toLowerCase()) ||
-    f.location.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = feeds
+    .filter(f =>
+      f.item.toLowerCase().includes(search.toLowerCase()) ||
+      f.supplierName.toLowerCase().includes(search.toLowerCase()) ||
+      f.location.toLowerCase().includes(search.toLowerCase())
+    )
+    .slice()
+    .reverse();
 
   const total = filtered.reduce((s, f) => s + f.amount, 0);
 

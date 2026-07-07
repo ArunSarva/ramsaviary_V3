@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import {
   TrendingUp,
   TrendingDown,
@@ -14,6 +14,16 @@ interface DashboardProps {
 }
 
 const fmt = (n: number) => "₹" + n.toLocaleString("en-IN");
+
+const ALL_TIME = "all";
+const currentMonthKey = () => new Date().toISOString().slice(0, 7);
+const monthLabel = (key: string) => {
+  const [y, m] = key.split("-").map(Number);
+  return new Date(y, m - 1, 1).toLocaleDateString("en-IN", {
+    month: "long",
+    year: "numeric",
+  });
+};
 
 const StatCard = ({ icon: Icon, label, value, sub, color, textColor }: any) => (
   <div className="glass-card rounded-2xl p-4 flex flex-col gap-1.5">
@@ -31,15 +41,40 @@ const StatCard = ({ icon: Icon, label, value, sub, color, textColor }: any) => (
 );
 
 const Dashboard: React.FC<DashboardProps> = ({ data }) => {
-  const totalSell = data.birds.reduce((s, b) => s + b.amount, 0);
-  const totalBuy = data.feeds.reduce((s, f) => s + f.amount, 0);
+  const months = useMemo(() => {
+    const set = new Set<string>();
+    data.birds.forEach((b) => b.date && set.add(b.date.slice(0, 7)));
+    data.feeds.forEach((f) => f.date && set.add(f.date.slice(0, 7)));
+    set.add(currentMonthKey());
+    return Array.from(set).sort().reverse();
+  }, [data.birds, data.feeds]);
+
+  const [selectedMonth, setSelectedMonth] = useState(currentMonthKey());
+
+  const birds = useMemo(
+    () =>
+      selectedMonth === ALL_TIME
+        ? data.birds
+        : data.birds.filter((b) => b.date.slice(0, 7) === selectedMonth),
+    [data.birds, selectedMonth],
+  );
+  const feeds = useMemo(
+    () =>
+      selectedMonth === ALL_TIME
+        ? data.feeds
+        : data.feeds.filter((f) => f.date.slice(0, 7) === selectedMonth),
+    [data.feeds, selectedMonth],
+  );
+
+  const totalSell = birds.reduce((s, b) => s + b.amount, 0);
+  const totalBuy = feeds.reduce((s, f) => s + f.amount, 0);
   const profit = totalSell - totalBuy;
-  const totalBirdsSold = data.birds.reduce((s, b) => s + b.quantity, 0);
-  const unpaidSell = data.birds
+  const totalBirdsSold = birds.reduce((s, b) => s + b.quantity, 0);
+  const unpaidSell = birds
     .filter((b) => b.status !== "Paid")
     .reduce((s, b) => s + b.amount, 0);
 
-  const birdBreakdown = data.birds.reduce(
+  const birdBreakdown = birds.reduce(
     (acc, b) => {
       acc[b.birds] = (acc[b.birds] || 0) + b.amount;
       return acc;
@@ -50,7 +85,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5);
 
-  const locationBreakdown = data.birds.reduce(
+  const locationBreakdown = birds.reduce(
     (acc, b) => {
       acc[b.location] = (acc[b.location] || 0) + b.amount;
       return acc;
@@ -61,12 +96,47 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 4);
 
-  const recentSales = [...data.birds]
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 5);
+  const recentSales = birds
+    .map((b, i) => ({ b, i }))
+    .sort((x, y) => {
+      const dateDiff = new Date(y.b.date).getTime() - new Date(x.b.date).getTime();
+      return dateDiff !== 0 ? dateDiff : y.i - x.i;
+    })
+    .slice(0, 5)
+    .map(({ b }) => b);
 
   return (
     <div className="space-y-4">
+      {/* Month selector */}
+      <div className="glass-card rounded-2xl p-3 flex items-center justify-between gap-2">
+        <span className="text-white/50 text-xs font-medium pl-1">
+          Showing
+        </span>
+        <select
+          value={selectedMonth}
+          onChange={(e) => setSelectedMonth(e.target.value)}
+          className="glass-input rounded-xl px-3 py-2 text-sm text-white flex-1 max-w-[50%]"
+        >
+          <option value={ALL_TIME}>All Time</option>
+          {months.map((m) => (
+            <option key={m} value={m}>
+              {monthLabel(m)}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {birds.length === 0 && feeds.length === 0 ? (
+        <div className="glass-card rounded-2xl p-8 text-center">
+          <p className="text-white/70 font-semibold mb-1">
+            No records for {selectedMonth === ALL_TIME ? "this range" : monthLabel(selectedMonth)}
+          </p>
+          <p className="text-white/40 text-sm">
+            Try a different month or switch to All Time.
+          </p>
+        </div>
+      ) : (
+      <>
       {/* P&L hero card */}
       <div className="glass-card rounded-2xl p-5 flex items-center justify-between">
         <div>
@@ -95,7 +165,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
           icon={TrendingUp}
           label="Total Sales"
           value={fmt(totalSell)}
-          sub={`${data.birds.length} transactions`}
+          sub={`${birds.length} transactions`}
           color="bg-emerald-500/30"
           textColor="text-emerald-400"
         />
@@ -103,7 +173,7 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
           icon={TrendingDown}
           label="Purchases"
           value={fmt(totalBuy)}
-          sub={`${data.feeds.length} transactions`}
+          sub={`${feeds.length} transactions`}
           color="bg-rose-500/30"
           textColor="text-rose-400"
         />
@@ -211,6 +281,8 @@ const Dashboard: React.FC<DashboardProps> = ({ data }) => {
             ))}
           </div>
         </div>
+      )}
+      </>
       )}
     </div>
   );

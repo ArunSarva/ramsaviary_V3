@@ -70,14 +70,17 @@ const BirdsTable: React.FC<BirdsTableProps> = ({ birds, onDelete }) => {
   const [filterStatus, setFilterStatus] = useState('All');
   const [modal, setModal] = useState<{ index: number; label: string } | null>(null);
 
-  const filtered = birds.filter(b => {
-    const matchSearch =
-      b.birds.toLowerCase().includes(search.toLowerCase()) ||
-      b.customerName.toLowerCase().includes(search.toLowerCase()) ||
-      b.location.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = filterStatus === 'All' || b.status === filterStatus;
-    return matchSearch && matchStatus;
-  });
+  const filtered = birds
+    .filter(b => {
+      const matchSearch =
+        b.birds.toLowerCase().includes(search.toLowerCase()) ||
+        b.customerName.toLowerCase().includes(search.toLowerCase()) ||
+        b.location.toLowerCase().includes(search.toLowerCase());
+      const matchStatus = filterStatus === 'All' || b.status === filterStatus;
+      return matchSearch && matchStatus;
+    })
+    .slice()
+    .reverse();
 
   const total = filtered.reduce((s, b) => s + b.amount, 0);
 
