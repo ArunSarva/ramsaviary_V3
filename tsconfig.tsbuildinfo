@@ -1,0 +1,1 @@
+{"root":["./src/App.tsx","./src/excelUtils.ts","./src/main.tsx","./src/types.ts","./src/vite-env.d.ts","./src/components/AddTransaction.tsx","./src/components/BirdsTable.tsx","./src/components/ConfirmModal.tsx","./src/components/Dashboard.tsx","./src/components/FeedsTable.tsx"],"version":"5.9.3"}
