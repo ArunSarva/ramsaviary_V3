@@ -42,9 +42,17 @@ const StatCard = ({ icon: Icon, label, value, sub, color, textColor }: any) => (
 
 const Dashboard: React.FC<DashboardProps> = ({ data }) => {
   const months = useMemo(() => {
+    const isValidMonthKey = (key: string) =>
+      /^\d{4}-\d{2}$/.test(key) && !isNaN(new Date(key + "-01").getTime());
     const set = new Set<string>();
-    data.birds.forEach((b) => b.date && set.add(b.date.slice(0, 7)));
-    data.feeds.forEach((f) => f.date && set.add(f.date.slice(0, 7)));
+    data.birds.forEach((b) => {
+      const key = b.date?.slice(0, 7);
+      if (key && isValidMonthKey(key)) set.add(key);
+    });
+    data.feeds.forEach((f) => {
+      const key = f.date?.slice(0, 7);
+      if (key && isValidMonthKey(key)) set.add(key);
+    });
     set.add(currentMonthKey());
     return Array.from(set).sort().reverse();
   }, [data.birds, data.feeds]);
