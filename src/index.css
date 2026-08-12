@@ -57,3 +57,16 @@
     font-size: 16px !important;
   }
 }
+
+/* iOS Safari renders date/time inputs with their own boxed segment UI that
+   ignores the input's set width/padding and overflows its rounded container.
+   Resetting appearance lets our own width/padding rules apply instead. */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 0;
+  max-width: 100%;
+  color-scheme: dark;
+}
